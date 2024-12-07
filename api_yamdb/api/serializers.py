@@ -4,33 +4,54 @@ from django.db.models import Avg
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    average_rating = serializers.SerializerMethodField()
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        read_only=True
+    )
+    author = serializers.SlugRelatedField(
+        slug_field='user',
+        read_only=True
+    )
+    score_avg = serializers.SerializerMethodField()
+
+    def get_score_avg(self, obj):
+        return obj.title.reviews.aggregate(Avg('score'))['score__avg']
+
+    def validate_score(self, value):
+        if not 1 <= value <= 10:
+            raise serializers.ValidationError(
+                'Оценка должна быть по 10-бальной шкале!'
+            )
+        return value
+
+    def validate(self, data):
+        request = self.context['request']
+        author = request.user
+        title_id = self.context.get('view').kwargs.get('title_id')
+        if request.method == 'POST' and Review.objects.filter(
+            title_id=title_id, author=author
+        ).exists():
+            raise serializers.ValidationError(
+                'Вы уже оставили отзыв на это произведение.'
+            )
+        return data
 
     class Meta:
+        fields = '__all__'
         model = Review
-        fields = [
-            'id',
-            'title',
-            'author',
-            'text',
-            'score',
-            'pub_date',
-            'average_rating'
-        ]
-        read_only_fields = ['title']
 
-    def get_average_rating(self, obj):
-        """Вычисление среднего рейтинга для произведения."""
-        title_id = obj.title.id
-        average_rating = Review.objects.filter(title_id=title_id).aggregate(
-            Avg('score')
-        )['score__avg']
-        return round(average_rating, 1) if average_rating is not None else 0
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    review = serializers.SlugRelatedField(
+        slug_field='text',
+        read_only=True
+    )
+    author = serializers.SlugRelatedField(
+        slug_field='user',
+        read_only=True
+    )
 
     class Meta:
+        fields = '__all__'
         model = Comment
-        fields = ['id', 'review', 'author', 'text', 'pub_date']
-        read_only_fields = ['review']
