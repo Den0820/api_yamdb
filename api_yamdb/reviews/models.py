@@ -5,17 +5,6 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 User  = get_user_model()
 
 
-class Title(models.Model):
-
-    def update_average_rating(self):
-        reviews = self.reviews.all()
-        if reviews:
-            self.average_rating = round(
-                sum(review.score for review in reviews) / len(reviews), 1
-            )
-            self.save()
-
-
 class Review(models.Model):
     title = models.ForeignKey(
         Title,
