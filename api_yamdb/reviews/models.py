@@ -6,21 +6,31 @@ User  = get_user_model()
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=255)
-    year = models.PositiveSmallIntegerField()
-    category = models.CharField(max_length=255)
+
+    def update_average_rating(self):
+        reviews = self.reviews.all()
+        if reviews:
+            self.average_rating = round(
+                sum(review.score for review in reviews) / len(reviews), 1
+            )
+            self.save()
 
 
 class Review(models.Model):
-    title = models.ForeignKey(Title,
-                              on_delete=models.CASCADE,
-                              related_name='reviews')
-    author = models.ForeignKey(User,
-                               on_delete=models.CASCADE,
-                               related_name='reviews')
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
     text = models.TextField()
-    score = models.PositiveSmallIntegerField(validators=[MinValueValidator(1),
-                                                         MaxValueValidator(10)])
+    score = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
     pub_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -29,6 +39,10 @@ class Review(models.Model):
                                     name='unique_review'),
         ]
         ordering = ['-pub_date']
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.title.update_average_rating()
 
 
 class Comment(models.Model):
