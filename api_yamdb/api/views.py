@@ -1,10 +1,57 @@
-from rest_framework import viewsets, permissions
-from rest_framework.response import Response
-from rest_framework.exceptions import (
-    NotFound, ValidationError, PermissionDenied)
 from django.db.models import Avg
-from reviews.models import Review, Comment, Title
-from .serializers import ReviewSerializer, CommentSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, permissions, viewsets
+from rest_framework.exceptions import (
+    NotFound, 
+    PermissionDenied,
+    ValidationError)
+from rest_framework.response import Response
+
+
+from api.filters import TitleFilter
+from api.permissions import IsAdminOrReadOnly
+from api.serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    ReviewSerializer,
+    TitleSerializer)
+from reviews.models import (
+    Category, 
+    Comment, 
+    Genre, 
+    Review, 
+    Title)
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    ''' Вьюсет для просмотра категорий.'''
+
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    search_fields = ('name',)
+    filter_backends = (filters.SearchFilter,)
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    ''' Вьюсет для просмотра жанров.'''
+
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    search_fields = ('name',)
+    filter_backends = (filters.SearchFilter,)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    ''' Вьюсет для просмотра произведений.'''
+
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filterset_class = TitleFilter
+    filter_backends = (DjangoFilterBackend,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -49,3 +96,4 @@ class CommentViewSet(viewsets.ModelViewSet):
             ).first(),
             author=self.request.user
         )
+

@@ -1,7 +1,34 @@
-from rest_framework import serializers
-from reviews.models import Review, Comment
 from django.db.models import Avg
+from rest_framework import serializers
 
+from reviews.models import Category, Comment, Genre, Review, Title
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    ''' Сериализатор для категорий.'''
+
+    class Meta:
+        fields = '__all__'
+        model = Category
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    ''' Сериализатор для жанров.'''
+
+    class Meta:
+        fields = '__all__'
+        model = Genre
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для произведений."""
+
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Title
 
 class ReviewSerializer(serializers.ModelSerializer):
     title = serializers.SlugRelatedField(
