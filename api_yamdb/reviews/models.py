@@ -29,10 +29,6 @@ class Review(models.Model):
         ]
         ordering = ['-pub_date']
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.title.update_average_rating()
-
 
 class Comment(models.Model):
     review = models.ForeignKey(Review,
