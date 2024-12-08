@@ -1,13 +1,14 @@
 from django.db import models
-
-from reviews.validators import validate_regular_exp, validate_year
+from django.contrib.auth import get_user_model
+from reviews.validators import MinValueValidator, MaxValueValidator, validate_regular_exp, validate_year
 
 MAX_LENGTH_NAME = 256
 MAX_LENGTH_SLAG = 50
 
+User  = get_user_model()
 
 class Genre(models.Model):
-    """Описании модели жанров."""
+    """Описание модели жанров."""
 
     name = models.CharField(
         max_length=MAX_LENGTH_NAME,
@@ -29,7 +30,7 @@ class Genre(models.Model):
 
 
 class Category(models.Model):
-    """Описании модели категорий."""
+    """Описание модели категорий."""
 
     name = models.CharField(
         max_length=MAX_LENGTH_NAME,
@@ -51,7 +52,7 @@ class Category(models.Model):
 
 
 class Title(models.Model):
-    """Описании модели произведений, к которым пишут отзывы."""
+    """Описание модели произведений, к которым пишут отзывы."""
 
     name = models.CharField(
         max_length=MAX_LENGTH_NAME,
@@ -81,3 +82,44 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Review(models.Model):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    text = models.TextField()
+    score = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
+    pub_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['title', 'author'],
+                                    name='unique_review'),
+        ]
+        ordering = ['-pub_date']
+
+
+class Comment(models.Model):
+    review = models.ForeignKey(Review,
+                               on_delete=models.CASCADE,
+                               related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE,
+                               related_name='comments')
+    text = models.TextField()
+    pub_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-pub_date']
+
+    def __str__(self):
+        return f'{self.author} - {self.review.title} - {self.text[:20]}'
