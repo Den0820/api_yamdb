@@ -1,11 +1,14 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-from reviews.validators import MinValueValidator, MaxValueValidator, validate_regular_exp, validate_year
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+
+from reviews.validators import validate_regular_exp, validate_year
 
 MAX_LENGTH_NAME = 256
 MAX_LENGTH_SLAG = 50
 
-User  = get_user_model()
+User = get_user_model()
+
 
 class Genre(models.Model):
     """Описание модели жанров."""
@@ -73,6 +76,7 @@ class Title(models.Model):
     )
     category = models.ForeignKey(
         Category,
+        on_delete=models.PROTECT,
         verbose_name='Slug категории'
     )
 
