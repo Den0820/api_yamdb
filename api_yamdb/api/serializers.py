@@ -1,11 +1,10 @@
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.response import Response
-from users.models import CustomUser
-from django.db.models import Avg
-from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import CustomUser
 
 
 class UserRegistraionSerializer(serializers.ModelSerializer):
@@ -35,8 +34,11 @@ class ObtainTokenSerializer(serializers.ModelSerializer):
         fields = ('username', 'confirmation_code')
 
     def validate(self, data):
-        if not CustomUser.objects.filter(username=data.get('username')).exists():
-            return Response('Такого пользователя не существует', status=status.HTTP_400_BAD_REQUEST)
+        if not CustomUser.objects.filter(username=data
+                                         .get('username')).exists():
+            return Response(
+                'Такого пользователя не существует',
+                status=status.HTTP_400_BAD_REQUEST)
         user = CustomUser.objects.get(username=data.get('username'))
         if user.confirmation_code != data.get('confirmation_code'):
             raise serializers.ValidationError("Неверный код подтверждения.")
@@ -47,7 +49,12 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = ('username',
+                  'email',
+                  'first_name',
+                  'last_name',
+                  'bio',
+                  'role')
 
 
 class CategorySerializer(serializers.ModelSerializer):
