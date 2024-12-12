@@ -73,11 +73,28 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    """Сериализатор для произведений."""
+class TitleReadSerializer(serializers.ModelSerializer):
+    """Сериализатор для чтения произведений."""
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(read_only=True, many=True)
+    rating = serializers.IntegerField(read_only=True, required=False)
 
-    category = CategorySerializer()
-    genre = GenreSerializer(many=True)
+    class Meta:
+        fields = '__all__'
+        model = Title
+
+
+class TitleEditSerializer(serializers.ModelSerializer):
+    """Сериализатор для записи и изменения произведений."""
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        many=True,
+        slug_field='slug'
+    )
 
     class Meta:
         fields = '__all__'
