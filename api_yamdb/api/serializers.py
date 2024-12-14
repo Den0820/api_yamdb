@@ -115,17 +115,17 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
 
     def validate_score(self, score):
-        if 0 > score > 10:
+        if not 0 < score <= 10:
             raise serializers.ValidationError('Оценка по 10-бальной шкале!')
         return score
 
     def validate(self, data):
-        if self.context['request'].method == 'POST' and Review.objects.filter(
-            title=data.get('title'),
-            author=self.context['request'].user
-        ).exists():
-            raise serializers.ValidationError(
-                'Вы уже оставляли отзыв на это произведение.')
+        if self.context['request'].method == 'POST':
+            title = data.get('title')
+            author = self.context['request'].user
+            if Review.objects.filter(title=title, author=author).exists():
+                raise serializers.ValidationError(
+                    'Вы уже оставляли отзыв на это произведение.')
         return data
 
 class CommentSerializer(serializers.ModelSerializer):

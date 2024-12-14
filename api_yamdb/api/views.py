@@ -152,7 +152,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             id=self.kwargs.get('title_id'))
         if Review.objects.filter(title=title, author=self.request.user).exists():
             raise ValidationError(detail='Может существовать только один отзыв!')
-        serializer.save(author=self.request.user, title_id=title.id)
+        serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -161,18 +161,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
-        review = get_object_or_404(
-            Review,
-            id=self.kwargs.get('review_id'))
-        return review.comments.all()
+        return Comment.objects.filter(review_id=self.kwargs.get('review_id'))
 
     def perform_create(self, serializer):
         review = get_object_or_404(
             Review,
-            id=self.kwargs.get('review_id'))
+            id=self.kwargs.get('review_id')
+        )
         serializer.save(author=self.request.user, review=review)
-    
-    def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return self.update(request, *args, **kwargs)
-
