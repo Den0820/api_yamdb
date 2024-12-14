@@ -25,8 +25,8 @@ class Command(BaseCommand):
             with open(
                 f'{settings.BASE_DIR}/static/data/{csv_f}',
                 'r',
-                encoding='utf-8') as csv_file:
-                    reader = csv.DictReader(csv_file)
-                    model.objects.bulk_create(
-                        model(**data) for data in reader)
+                    encoding='utf-8') as csv_file:
+                reader = csv.DictReader(csv_file)
+                model.objects.bulk_create(
+                    model(**data) for data in reader)
         self.stdout.write(self.style.SUCCESS('Данные прогружены!'))

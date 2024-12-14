@@ -20,6 +20,6 @@ def verification(cur_user, cur_email):
         subject='Верификация',
         message=verification_code,
         from_email='test@yamdb.ru',
-        recipient_list=[user.email,],
+        recipient_list=[user.email, ],
         fail_silently=True,
     )
