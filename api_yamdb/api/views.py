@@ -1,7 +1,15 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import filters, mixins, permissions, status, viewsets
-from rest_framework.exceptions import NotFound, ValidationError, MethodNotAllowed
+from rest_framework.decorators import api_view
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
+from rest_framework.exceptions import (
+    NotFound,
+    ValidationError,
+    MethodNotAllowed
+)
 from rest_framework.pagination import (
     LimitOffsetPagination,
     PageNumberPagination)
@@ -11,7 +19,12 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.filters import TitleFilter
-from api.permissions import AdminRole, IsAdminOrReadOnly, IsOwnerOrReadOnlyReview
+from api.permissions import (
+    AdminRole,
+    IsAdminOrReadOnly,
+    IsOwnerOrReadOnlyReview,
+    OwnerOrAdmins
+)
 from api.serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -21,7 +34,8 @@ from api.serializers import (
     TitleEditSerializer,
     TitleReadSerializer,
     UserRegistraionSerializer,
-    UserSerializer)
+    UserSerializer,
+    MeSerializer)
 from api.utils import verification
 from reviews.models import (
     Category,
@@ -86,13 +100,34 @@ class ObtainTokenView(APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-
-    queryset = CustomUser.objects.all().order_by('username')
+    queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('username',)
-    permission_classes = [AdminRole]
+    permission_classes = (OwnerOrAdmins, )
+    filter_backends = (SearchFilter, )
+    filterset_fields = ('username')
+    search_fields = ('username', )
+    lookup_field = 'username'
+    http_method_names = [
+        'get', 'post', 'patch', 'delete', 'head', 'options', 'trace'
+    ]
+
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        url_path='me',
+        permission_classes=(IsAuthenticated, )
+    )
+    def get_patch_me(self, request):
+        user = get_object_or_404(CustomUser, username=self.request.user)
+        if request.method == 'GET':
+            serializer = MeSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == 'PATCH':
+            serializer = MeSerializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CategoryViewSet(ListCreateViewSet):
