@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import CustomUser
 
-
 class UserRegistraionSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -107,36 +106,27 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True
     )
     author = serializers.SlugRelatedField(
-        slug_field='user',
+        slug_field='username',
         read_only=True
     )
-    score_avg = serializers.SerializerMethodField()
-
-    def get_score_avg(self, obj):
-        return obj.title.reviews.aggregate(Avg('score'))['score__avg']
-
-    def validate_score(self, value):
-        if not 1 <= value <= 10:
-            raise serializers.ValidationError(
-                'Оценка должна быть по 10-бальной шкале!'
-            )
-        return value
-
-    def validate(self, data):
-        request = self.context['request']
-        if request.method == 'POST' and Review.objects.filter(
-            title=request.parser_context['kwargs']['title_id'],
-            author=request.user
-        ).exists():
-            raise serializers.ValidationError(
-                'Вы уже оставили отзыв на это произведение.'
-            )
-        return data
 
     class Meta:
         fields = '__all__'
         model = Review
 
+    def validate_score(self, score):
+        if not 0 < score <= 10:
+            raise serializers.ValidationError('Оценка по 10-бальной шкале!')
+        return score
+
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            title = data.get('title')
+            author = self.context['request'].user
+            if Review.objects.filter(title=title, author=author).exists():
+                raise serializers.ValidationError(
+                    'Вы уже оставляли отзыв на это произведение.')
+        return data
 
 class CommentSerializer(serializers.ModelSerializer):
     review = serializers.SlugRelatedField(
@@ -144,10 +134,10 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True
     )
     author = serializers.SlugRelatedField(
-        slug_field='user',
+        slug_field='username',
         read_only=True
     )
 
     class Meta:
-        fields = '__all__'
+        fields = ('author', 'id', 'text', 'pub_date', 'review')
         model = Comment
