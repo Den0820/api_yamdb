@@ -1,4 +1,3 @@
-from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.response import Response
@@ -6,6 +5,7 @@ from django.core import validators
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import CustomUser
+
 
 class UserRegistraionSerializer(serializers.ModelSerializer):
 
@@ -102,8 +102,9 @@ class UserSerializer(serializers.ModelSerializer):
             'email': {'required': True},
         }
 
+
 class CategorySerializer(serializers.ModelSerializer):
-    ''' Сериализатор для категорий.'''
+    '''Сериализатор для категорий.'''
 
     class Meta:
         fields = ('name', 'slug')
@@ -111,7 +112,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    ''' Сериализатор для жанров.'''
+    '''Сериализатор для жанров.'''
 
     class Meta:
         fields = ('name', 'slug')
@@ -120,6 +121,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleReadSerializer(serializers.ModelSerializer):
     """Сериализатор для чтения произведений."""
+
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
     rating = serializers.IntegerField(read_only=True, required=False)
@@ -131,6 +133,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
 class TitleEditSerializer(serializers.ModelSerializer):
     """Сериализатор для записи и изменения произведений."""
+
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug'
@@ -147,6 +150,7 @@ class TitleEditSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+
     title = serializers.SlugRelatedField(
         slug_field='name',
         read_only=True
@@ -173,6 +177,7 @@ class ReviewSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     'Вы уже оставляли отзыв на это произведение.')
         return data
+
 
 class CommentSerializer(serializers.ModelSerializer):
     review = serializers.SlugRelatedField(

@@ -1,6 +1,5 @@
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
-from rest_framework import status
 
 from users.models import CustomUser
 
