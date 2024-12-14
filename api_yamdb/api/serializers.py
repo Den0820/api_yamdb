@@ -2,6 +2,7 @@ from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.response import Response
+from django.core import validators
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import CustomUser
@@ -45,16 +46,61 @@ class ObtainTokenSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        max_length=254,
+        validators=(validators.MaxLengthValidator(254),)
+    )
+    username = serializers.SlugField(
+        max_length=150,
+        validators=(
+            validators.MaxLengthValidator(150),
+            validators.RegexValidator(r'^[\w.@+-]+\Z')
+        )
+    )
+
+    def validate(self, attrs):
+        if CustomUser.objects.filter(email=attrs.get('email')).exists():
+            user = CustomUser.objects.get(email=attrs.get('email'))
+            if user.username != attrs.get('username'):
+                raise serializers.ValidationError(
+                    {
+                        "error": "Email is already used!"
+                    }
+                )
+        if CustomUser.objects.filter(username=attrs.get('username')).exists():
+            user = CustomUser.objects.get(username=attrs.get('username'))
+            if user.email != attrs.get('email'):
+                raise serializers.ValidationError(
+                    {
+                        "error": "Username is already used!"
+                    }
+                )
+        return super().validate(attrs)
+
+    def validate_username(self, value):
+        if value == "me":
+            raise serializers.ValidationError(
+                {
+                    "error": "You cannot use 'me' as username!"
+                }
+            )
+        return value
 
     class Meta:
         model = CustomUser
-        fields = ('username',
-                  'email',
-                  'first_name',
-                  'last_name',
-                  'bio',
-                  'role')
-
+        fields = (
+            'username',
+            'email',
+            'role',
+            'bio',
+            'first_name',
+            'last_name'
+        )
+        lookup_field = 'username'
+        extra_kwargs = {
+            'username': {'required': True},
+            'email': {'required': True},
+        }
 
 class CategorySerializer(serializers.ModelSerializer):
     ''' Сериализатор для категорий.'''
@@ -141,3 +187,18 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('author', 'id', 'text', 'pub_date', 'review')
         model = Comment
+
+
+class MeSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+        )
