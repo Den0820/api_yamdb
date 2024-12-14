@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, permissions, status, viewsets
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound, ValidationError, MethodNotAllowed
 from rest_framework.pagination import (
     LimitOffsetPagination,
     PageNumberPagination)
@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.filters import TitleFilter
-from api.permissions import AdminRole, IsAdminOrReadOnly
+from api.permissions import AdminRole, IsAdminOrReadOnly, IsOwnerOrReadOnlyReview
 from api.serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -137,43 +137,35 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = (IsOwnerOrReadOnlyReview,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
-        """Получение списка всех отзывов для произведения."""
-        title_id = self.kwargs.get('title_id')
-        return Review.objects.filter(title_id=title_id)
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id'))
+        return title.reviews.all()
 
     def perform_create(self, serializer):
-        """Добавление нового отзыва."""
-        title_id = self.kwargs.get('title_id')
-        if not Title.objects.filter(id=title_id).exists():
-            raise NotFound('Произведение не найдено.')
-        if Review.objects.filter(
-                title_id=title_id, author=self.request.user
-        ).exists():
-            raise ValidationError('Вы уже оставили отзыв на это произведение.')
-        serializer.save(title_id=title_id, author=self.request.user)
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id'))
+        if Review.objects.filter(title=title, author=self.request.user).exists():
+            raise ValidationError(detail='Может существовать только один отзыв!')
+        serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = (IsOwnerOrReadOnlyReview,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
-        """Получение списка всех комментариев к отзыву."""
-        review_id = self.kwargs.get('review_id')
-        title_id = self.kwargs.get('title_id')
-        return Comment.objects.select_related('review').filter(
-            review_id=review_id, review__title_id=title_id
-        )
+        return Comment.objects.filter(review_id=self.kwargs.get('review_id'))
 
     def perform_create(self, serializer):
-        """Добавление комментария к отзыву."""
-        serializer.save(
-            review=Review.objects.filter(
-                id=self.kwargs.get('review_id'),
-                title_id=self.kwargs.get('title_id')
-            ).first(),
-            author=self.request.user
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id')
         )
+        serializer.save(author=self.request.user, review=review)
