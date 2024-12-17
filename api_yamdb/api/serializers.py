@@ -164,15 +164,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         read_only=True
     )
+    score = serializers.IntegerField(
+        min_value=1,
+        max_value=10,
+        error_messages={'min_value': 'Оценка должна быть больше 0!',
+                        'max_value': 'Оценка должна быть не больше 10!'}
+    )
 
     class Meta:
         fields = '__all__'
         model = Review
-
-    def validate_score(self, score):
-        if not 0 < score <= 10:
-            raise serializers.ValidationError('Оценка по 10-бальной шкале!')
-        return score
 
     def validate(self, data):
         if self.context['request'].method == 'POST':
