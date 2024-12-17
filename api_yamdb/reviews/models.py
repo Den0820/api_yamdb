@@ -21,7 +21,7 @@ class Genre(models.Model):
     slug = models.SlugField(
         max_length=MAX_LENGTH_SLAG,
         verbose_name='Slug жанра',
-        validators=[validate_regular_exp,],
+        validators=[validate_regular_exp, ],
         unique=True
     )
 
@@ -43,7 +43,7 @@ class Category(models.Model):
     )
     slug = models.SlugField(
         max_length=MAX_LENGTH_SLAG,
-        validators=[validate_regular_exp,],
+        validators=[validate_regular_exp, ],
         verbose_name='Slug категории',
         unique=True
     )
@@ -66,7 +66,7 @@ class Title(models.Model):
     )
     year = models.IntegerField(
         verbose_name='Год выпуска',
-        validators=[validate_year,],
+        validators=[validate_year, ],
     )
     description = models.TextField(
         verbose_name='Описание',

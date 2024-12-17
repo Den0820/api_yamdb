@@ -1,5 +1,11 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.validators import MaxLengthValidator, RegexValidator
+from api_yamdb.settings import (
+    EMAIL_ML,
+    USERNAME_ML,
+    USERNAME_REGEX
+)
 
 
 class CustomUser(AbstractUser):
@@ -19,7 +25,11 @@ class CustomUser(AbstractUser):
 
     email = models.EmailField(
         'Почта',
-        unique=True
+        max_length=EMAIL_ML,
+        unique=True,
+        validators=[
+            MaxLengthValidator(EMAIL_ML),
+        ]
     )
 
     confirmation_code = models.CharField(
@@ -27,6 +37,17 @@ class CustomUser(AbstractUser):
         max_length=15,
         blank=True,
         null=True
+    )
+
+    username = models.CharField(
+        'Имя пользователя',
+        max_length=USERNAME_ML,
+        unique=True,
+        validators=[
+            MaxLengthValidator(USERNAME_ML),
+            RegexValidator(USERNAME_REGEX),
+            RegexValidator('me', message="Username cannot be 'me'")
+        ]
     )
 
     class Meta:
@@ -42,7 +63,7 @@ class CustomUser(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.is_superuser or self.role == "admin" or self.is_staff
+        return self.is_superuser or self.role == 'admin' or self.is_staff
 
     @property
     def is_moder(self):

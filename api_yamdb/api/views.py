@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, MethodNotAllowed
 from rest_framework.pagination import (
     LimitOffsetPagination,
     PageNumberPagination)
@@ -89,6 +89,14 @@ class ObtainTokenView(APIView):
                 {'token': str(refresh.access_token)},
                 status=status.HTTP_200_OK
             )
+        cur_user = CustomUser.objects.filter(
+            username=request.data.get('username')
+        ).first()
+        if cur_user is not None:
+            verification(
+                cur_user.username,
+                cur_user.email
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -104,6 +112,7 @@ class UserViewSet(viewsets.ModelViewSet):
     http_method_names = [
         'get', 'post', 'patch', 'delete', 'head', 'options', 'trace'
     ]
+    # Нужно для теста users_username_patch_admin
 
     @action(
         methods=['get', 'patch'],
@@ -116,7 +125,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == 'GET':
             serializer = MeSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        if request.method == 'PATCH':
+        elif request.method == 'PATCH':
             serializer = MeSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
