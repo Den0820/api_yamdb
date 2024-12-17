@@ -5,6 +5,11 @@ from django.core import validators
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import CustomUser
+from api_yamdb.settings import (
+    EMAIL_ML,
+    USERNAME_ML,
+    USERNAME_REGEX
+)
 
 
 class UserRegistraionSerializer(serializers.ModelSerializer):
@@ -41,20 +46,20 @@ class ObtainTokenSerializer(serializers.ModelSerializer):
                 status=status.HTTP_400_BAD_REQUEST)
         user = CustomUser.objects.get(username=data.get('username'))
         if user.confirmation_code != data.get('confirmation_code'):
-            raise serializers.ValidationError("Неверный код подтверждения.")
+            raise serializers.ValidationError('Неверный код подтверждения.')
         return data
 
 
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
-        max_length=254,
-        validators=(validators.MaxLengthValidator(254),)
+        max_length=EMAIL_ML,
+        validators=(validators.MaxLengthValidator(EMAIL_ML),)
     )
     username = serializers.SlugField(
-        max_length=150,
+        max_length=USERNAME_ML,
         validators=(
-            validators.MaxLengthValidator(150),
-            validators.RegexValidator(r'^[\w.@+-]+\Z')
+            validators.MaxLengthValidator(USERNAME_ML),
+            validators.RegexValidator(USERNAME_REGEX)
         )
     )
 
@@ -67,7 +72,7 @@ class UserSerializer(serializers.ModelSerializer):
                         "error": "Email is already used!"
                     }
                 )
-        if CustomUser.objects.filter(username=attrs.get('username')).exists():
+        elif CustomUser.objects.filter(username=attrs.get('username')).exists():
             user = CustomUser.objects.get(username=attrs.get('username'))
             if user.email != attrs.get('email'):
                 raise serializers.ValidationError(
@@ -159,15 +164,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         read_only=True
     )
+    score = serializers.IntegerField(
+        min_value=1,
+        max_value=10,
+        error_messages={'min_value': 'Оценка должна быть больше 0!',
+                        'max_value': 'Оценка должна быть не больше 10!'}
+    )
 
     class Meta:
         fields = '__all__'
         model = Review
-
-    def validate_score(self, score):
-        if not 0 < score <= 10:
-            raise serializers.ValidationError('Оценка по 10-бальной шкале!')
-        return score
 
     def validate(self, data):
         if self.context['request'].method == 'POST':

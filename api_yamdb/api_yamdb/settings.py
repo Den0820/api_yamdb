@@ -115,3 +115,14 @@ REST_FRAMEWORK = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLE_JWT = {'ACCESS_TOKEN_LIFETIME': timedelta(days=365)}
+
+
+# Constants
+
+EMAIL_ML = 254
+
+USERNAME_ML = 150
+
+USERNAME_REGEX = r'^[\w.@+-]+\Z'
+
+PROJECT_MAIL = 'test@yamdb.ru'

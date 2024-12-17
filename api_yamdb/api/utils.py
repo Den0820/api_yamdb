@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
 from users.models import CustomUser
+from api_yamdb.settings import PROJECT_MAIL
 
 
 def verification(cur_user, cur_email):
@@ -19,7 +20,7 @@ def verification(cur_user, cur_email):
     send_mail(
         subject='Верификация',
         message=verification_code,
-        from_email='test@yamdb.ru',
+        from_email=PROJECT_MAIL,
         recipient_list=[user.email, ],
         fail_silently=True,
     )
