@@ -23,13 +23,13 @@ from api.serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
+    MeSerializer,
     ObtainTokenSerializer,
     ReviewSerializer,
     TitleEditSerializer,
     TitleReadSerializer,
     UserRegistraionSerializer,
-    UserSerializer,
-    MeSerializer)
+    UserSerializer)
 from api.utils import verification
 from reviews.models import (
     Category,
@@ -101,9 +101,7 @@ class UserViewSet(viewsets.ModelViewSet):
     filterset_fields = ('username')
     search_fields = ('username', )
     lookup_field = 'username'
-    http_method_names = [
-        'get', 'post', 'patch', 'delete', 'head', 'options', 'trace'
-    ]
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(
         methods=['get', 'patch'],
