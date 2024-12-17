@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.exceptions import ValidationError, MethodNotAllowed
+from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import (
     LimitOffsetPagination,
     PageNumberPagination)
@@ -110,7 +110,6 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ('username', )
     lookup_field = 'username'
     http_method_names = ['get', 'post', 'patch', 'delete']
-
 
     @action(
         methods=['get', 'patch'],

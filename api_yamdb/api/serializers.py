@@ -72,7 +72,9 @@ class UserSerializer(serializers.ModelSerializer):
                         "error": "Email is already used!"
                     }
                 )
-        elif CustomUser.objects.filter(username=attrs.get('username')).exists():
+        elif CustomUser.objects.filter(
+            username=attrs.get('username')
+        ).exists():
             user = CustomUser.objects.get(username=attrs.get('username'))
             if user.email != attrs.get('email'):
                 raise serializers.ValidationError(
