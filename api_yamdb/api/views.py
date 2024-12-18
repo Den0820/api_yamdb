@@ -1,14 +1,13 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAuthenticated
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
-from rest_framework.exceptions import ValidationError, MethodNotAllowed
 from rest_framework.pagination import (
     LimitOffsetPagination,
     PageNumberPagination)
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -44,7 +43,7 @@ class ListCreateViewSet(mixins.CreateModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.ListModelMixin,
                         viewsets.GenericViewSet):
-    '''Родительский вьюсет для просмотра списка, создания, удаления объекта.'''
+    """Родительский вьюсет для просмотра списка, создания, удаления объекта."""
 
 
 class AuthView(APIView):
@@ -111,7 +110,6 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-
     @action(
         methods=['get', 'patch'],
         detail=False,
@@ -131,7 +129,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(ListCreateViewSet):
-    '''Вьюсет для просмотра категорий.'''
+    """Вьюсет для просмотра категорий."""
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -143,7 +141,7 @@ class CategoryViewSet(ListCreateViewSet):
 
 
 class GenreViewSet(ListCreateViewSet):
-    '''Вьюсет для просмотра жанров.'''
+    """Вьюсет для просмотра жанров."""
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -155,7 +153,7 @@ class GenreViewSet(ListCreateViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    '''Вьюсет для работы с произведениями.'''
+    """Вьюсет для работы с произведениями."""
 
     queryset = Title.objects.all().order_by('id')
     permission_classes = (IsAdminOrReadOnly,)

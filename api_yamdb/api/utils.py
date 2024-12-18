@@ -2,8 +2,8 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
-from users.models import CustomUser
 from api_yamdb.settings import PROJECT_MAIL
+from users.models import CustomUser
 
 
 def verification(cur_user, cur_email):
@@ -11,7 +11,7 @@ def verification(cur_user, cur_email):
 
     if user.email != cur_email:
         raise ValidationError(
-            "Данный email соотвествует другому пользователю!")
+            'Данный email соотвествует другому пользователю!')
 
     verification_code = CustomUser.objects.make_random_password()
     user.confirmation_code = verification_code

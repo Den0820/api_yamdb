@@ -1,15 +1,14 @@
-from rest_framework import serializers
-from rest_framework import status
-from rest_framework.response import Response
 from django.core import validators
+from rest_framework import serializers, status
+from rest_framework.response import Response
 
-from reviews.models import Category, Comment, Genre, Review, Title
-from users.models import CustomUser
 from api_yamdb.settings import (
     EMAIL_ML,
     USERNAME_ML,
     USERNAME_REGEX
 )
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import CustomUser
 
 
 class UserRegistraionSerializer(serializers.ModelSerializer):
@@ -69,24 +68,25 @@ class UserSerializer(serializers.ModelSerializer):
             if user.username != attrs.get('username'):
                 raise serializers.ValidationError(
                     {
-                        "error": "Email is already used!"
+                        'error': 'Email is already used!'
                     }
                 )
-        elif CustomUser.objects.filter(username=attrs.get('username')).exists():
+        elif CustomUser.objects.filter(
+                username=attrs.get('username')).exists():
             user = CustomUser.objects.get(username=attrs.get('username'))
             if user.email != attrs.get('email'):
                 raise serializers.ValidationError(
                     {
-                        "error": "Username is already used!"
+                        'error': 'Username is already used!'
                     }
                 )
         return super().validate(attrs)
 
     def validate_username(self, value):
-        if value == "me":
+        if value == 'me':
             raise serializers.ValidationError(
                 {
-                    "error": "You cannot use 'me' as username!"
+                    'error': 'You cannot use "me" as username!'
                 }
             )
         return value
@@ -109,7 +109,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    '''Сериализатор для категорий.'''
+    """Сериализатор для категорий."""
 
     class Meta:
         fields = ('name', 'slug')
@@ -117,7 +117,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    '''Сериализатор для жанров.'''
+    """Сериализатор для жанров."""
 
     class Meta:
         fields = ('name', 'slug')

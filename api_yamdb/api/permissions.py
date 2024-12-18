@@ -1,5 +1,5 @@
-from rest_framework import permissions
 from django.shortcuts import get_object_or_404
+from rest_framework import permissions
 
 from users.models import CustomUser
 
@@ -33,7 +33,7 @@ class AdminRole(permissions.BasePermission):
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
-    '''Разрешение создания, изменения и удаления только админу.'''
+    """Разрешение создания, изменения и удаления только админу."""
 
     def has_permission(self, request, view):
         return (
@@ -55,5 +55,5 @@ class IsOwnerOrReadOnlyReview(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         return (obj.author == request.user
-               or request.user.is_admin
-               or request.user.is_moder)
+                or request.user.is_admin
+                or request.user.is_moder)

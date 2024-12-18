@@ -1,6 +1,7 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxLengthValidator, RegexValidator
+
 from api_yamdb.settings import (
     EMAIL_ML,
     USERNAME_ML,
@@ -46,7 +47,7 @@ class CustomUser(AbstractUser):
         validators=[
             MaxLengthValidator(USERNAME_ML),
             RegexValidator(USERNAME_REGEX),
-            RegexValidator('me', message="Username cannot be 'me'")
+            RegexValidator('me', message='Username cannot be "me"')
         ]
     )
 
