@@ -1,6 +1,5 @@
-from pathlib import Path
 from datetime import timedelta
-
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -126,3 +125,6 @@ USERNAME_ML = 150
 USERNAME_REGEX = r'^[\w.@+-]+\Z'
 
 PROJECT_MAIL = 'test@yamdb.ru'
+
+MAX_LENGTH_NAME = 256
+MAX_LENGTH_SLAG = 50
