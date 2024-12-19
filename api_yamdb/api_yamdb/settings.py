@@ -24,6 +24,10 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'reviews.apps.ReviewsConfig',
     'api.apps.ApiConfig',
+<<<<<<< HEAD
+=======
+
+>>>>>>> 524d93b7fa44309dc159073e81096cfb6e63d691
 ]
 
 MIDDLEWARE = [
@@ -114,3 +118,14 @@ REST_FRAMEWORK = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLE_JWT = {'ACCESS_TOKEN_LIFETIME': timedelta(days=365)}
+
+
+# Constants
+
+EMAIL_ML = 254
+
+USERNAME_ML = 150
+
+USERNAME_REGEX = r'^[\w.@+-]+\Z'
+
+PROJECT_MAIL = 'test@yamdb.ru'
