@@ -16,7 +16,11 @@ class CustomUser(AbstractUser):
         ('admin', 'Администратор'),
     )
 
-    role = models.CharField(max_length=20, choices=USER_ROLES, default='user')
+    role = models.CharField(
+        max_length=20,
+        choices=USER_ROLES,
+        default=USER_ROLES[0][0]
+    )
 
     bio = models.TextField(
         'Биография',
@@ -64,8 +68,12 @@ class CustomUser(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.is_superuser or self.role == 'admin' or self.is_staff
+        return (
+            self.is_superuser
+            or self.role == self.USER_ROLES[2][0]
+            or self.is_staff
+        )
 
     @property
     def is_moder(self):
-        return self.role == 'moderator'
+        return self.role == self.USER_ROLES[1][0]

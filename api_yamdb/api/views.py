@@ -100,7 +100,7 @@ class ObtainTokenView(APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
+    queryset = CustomUser.objects.all().order_by('id')
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
     permission_classes = (OwnerOrAdmins, )
@@ -196,7 +196,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
-        return Comment.objects.filter(review_id=self.kwargs.get('review_id'))
+        return Comment.objects.filter(
+            review_id=self.kwargs.get('review_id')
+        ).order_by('id')
 
     def perform_create(self, serializer):
         review = get_object_or_404(
