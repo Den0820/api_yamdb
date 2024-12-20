@@ -108,7 +108,7 @@ class Review(models.Model):
     text = models.TextField(
         'текст отзыва',
         help_text='Введите текст отзыва',
-        max_length= MAX_LENGTH_TEXT
+        max_length=MAX_LENGTH_TEXT
     )
     author = models.ForeignKey(
         User,
@@ -151,7 +151,7 @@ class Comment(models.Model):
     )
     text = models.CharField(
         'текст комментария',
-        max_length= MAX_LENGTH_TEXT
+        max_length=MAX_LENGTH_TEXT
     )
     author = models.ForeignKey(
         User,
